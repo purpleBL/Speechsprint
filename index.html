@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0, user-scalable=no"/>
+  <title>SpeechSprint</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#21252B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Speechsprint">
+  <link rel="apple-touch-icon" href="icon-192x192.png">
+</head>
+<body>
+  <div class="container">
+    <h1>Speechsprint</h1>
+    <div class="word-stats">
+      <p>Всего: <span id="totalWords">0</span></p>
+      <p>Сущ: <span id="nounsCount">0</span></p>
+      <p>Прил: <span id="adjectivesCount">0</span></p>
+      <p>Глаг: <span id="verbsCount">0</span></p>
+    </div>
+    <div class="word-display">
+      <div class="word-display-box">
+        <p id="currentWord">Загрузите базу и нажмите старт</p>
+        <p id="wordType"></p>
+      </div>
+      <div class="timer-circle">
+        <div class="progress-ring">
+          <svg>
+            <circle class="progress-ring-circle-bg" cx="75" cy="75" r="65"></circle>
+            <circle class="progress-ring-circle" cx="75" cy="75" r="65"></circle>
+          </svg>
+          <span id="timeLeft">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="timer-controls">
+        <button id="startBtn">СТАРТ</button>
+      </div>
+      <div class="speech-controls">
+        <input type="number" id="interval" value="10" min="2" max="60">
+        <div class="category-select">
+          <select id="wordCategory">
+            <option value="all">Все</option>
+            <option value="nouns">Существительные</option>
+            <option value="adjectives">Прилагательные</option>
+            <option value="verbs">Глаголы</option>
+          </select>
+        </div>
+        <label>
+          <input type="checkbox" id="speechToggle" checked>
+          Звук
+        </label>
+      </div>
+      <div class="file-upload">
+        <label class="custom-file-upload">
+          <input type="file" id="wordFile" class="main_input_file" accept=".txt">
+          <div>
+            <span></span>
+          </div>
+          <input class="f_name" type="text" id="f_name" value="Файл не выбран." disabled />
+          <button id="clearCustomBtn">Очистить</button>
+        </label>
+      </div>
+    </div>
+  </div>
+  <script>
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.register(
+        '/github-page-pwa/sw.js',
+        { scope: '/github-page-pwa/' }
+      )
+    }
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
