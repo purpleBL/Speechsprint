@@ -74,11 +74,30 @@
     </div>
   </div>
   <script>
+    var GHPATH = '/Speechsprint';
+    var APP_PREFIX = 'spchspr_';
+    var VERSION = 'version_01';
+  
+    var URLS = [
+      `${GHPATH}/`,
+      `${GHPATH}/index.html`,
+      `${GHPATH}/style.css`,
+      `${GHPATH}/script.js`,
+      `${GHPATH}/sw.js`,
+      `${GHPATH}/manifest.json`,
+      `${GHPATH}/file-upload.svg`,
+      `${GHPATH}/trash.svg`,
+      `${GHPATH}/icon-192x192.png`,
+      `${GHPATH}/icon-512x512.png`,
+    ];
+  
     if (navigator.serviceWorker) {
-      navigator.serviceWorker.register(
-        '/Speechsprint/sw.js',
-        { scope: '/Speechsprint/' }
-      )
+      navigator.serviceWorker.register(`${GHPATH}/sw.js`, { scope: GHPATH })
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
     }
   </script>
   <script src="script.js"></script>
