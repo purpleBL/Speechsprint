@@ -1,5 +1,4 @@
 let isSpeechEnabled = true;
-
 const words = {
   nouns: [],
   adjectives: [],
@@ -84,9 +83,18 @@ function getRandomWord() {
   document.getElementById("currentWord").textContent = randomWord;
 
   if (isSpeechEnabled) {
+    // Create and play an audio element
     const utterance = new SpeechSynthesisUtterance(randomWord);
     utterance.lang = "ru-RU";
-    speechSynthesis.speak(utterance);
+    
+    // Use Audio API for background play on lock screen
+    let audio = new Audio();
+    audio.src = `data:audio/wav;base64,${btoa(randomWord)}`;
+    audio.play();
+    
+    // Set volume and pause as needed
+    audio.volume = 1; // adjust volume
+    audio.loop = false; // stop after one loop
   }
 
   document.getElementById("wordType").textContent = {
@@ -163,6 +171,39 @@ document.getElementById("speechToggle").addEventListener("change", (e) => {
   isSpeechEnabled = e.target.checked;
 });
 
+// Listen for file input to load word categories
+document.getElementById("wordFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  words.nouns = [];
+  words.adjectives = [];
+  words.verbs = [];
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      const lines = content.split("\n").map((line) => line.trim());
+
+      let currentCategory = "";
+      lines.forEach((line) => {
+        if (line === "nouns-data") {
+          currentCategory = "nouns";
+        } else if (line === "verbs-data") {
+          currentCategory = "verbs";
+        } else if (line === "adjectives-data") {
+          currentCategory = "adjectives";
+        } else if (line && currentCategory) {
+          words[currentCategory].push(line);
+        }
+      });
+
+      updateWordCounts();
+      updateStartButtonState();
+    };
+    reader.readAsText(file);
+  }
+});
+
 function updateWordCounts() {
   document.getElementById("totalWords").textContent = Object.values(
     words
@@ -198,42 +239,6 @@ function updateWordCounts() {
   }
 }
 
-document.getElementById("wordFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  // Reset words when new file is selected
-  words.nouns = [];
-  words.adjectives = [];
-  words.verbs = [];
-
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target.result;
-      const lines = content.split("\n").map((line) => line.trim());
-
-      let currentCategory = "";
-      lines.forEach((line) => {
-        if (line === "nouns-data") {
-          currentCategory = "nouns";
-        } else if (line === "verbs-data") {
-          currentCategory = "verbs";
-        } else if (line === "adjectives-data") {
-          currentCategory = "adjectives";
-        } else if (line && currentCategory) {
-          words[currentCategory].push(line);
-        }
-      });
-
-      updateWordCounts();
-      updateStartButtonState();
-    };
-    reader.readAsText(file);
-  }
-});
-
-// Initial button state
-updateStartButtonState();
-
 document.getElementById("clearCustomBtn").addEventListener("click", () => {
   words.nouns = [];
   words.adjectives = [];
@@ -253,37 +258,4 @@ document.getElementById("clearCustomBtn").addEventListener("click", () => {
     updateProgressBar();
   }
   document.getElementById("f_name").value = "Файл не выбран.";
-});
-
-document.getElementById("stopBtn").addEventListener("click", () => {
-  clearInterval(progressTimer);
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-  }
-  progress = 100;
-  updateProgressBar();
-  document.getElementById("currentWord").textContent = "Нажмите старт";
-  document.getElementById("wordType").textContent = "";
-});
-
-// Set initial message
-document.getElementById("currentWord").textContent =
-  "Загрузите базу и нажмите старт";
-
-// When words are loaded, update message
-document.getElementById("wordFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    document.getElementById("currentWord").textContent = "Нажмите старт";
-  }
-});
-
-// Initial word count update
-updateWordCounts();
-
-// Reset start button when clearing words
-document.getElementById("clearCustomBtn").addEventListener("click", () => {
-  const startBtn = document.getElementById("startBtn");
-  startBtn.textContent = "Старт";
 });
