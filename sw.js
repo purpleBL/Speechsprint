@@ -1,27 +1,44 @@
-
-// Change this to your repository name
-var GHPATH = '/Speechsprint';
- 
-// Choose a different app prefix name
-var APP_PREFIX = 'spchspr_';
- 
-// The version of the cache. Every time you change any of the files
-// you need to change this version (version_01, version_02…). 
-// If you don't change the version, the service worker will give your
-// users the old files!
-var VERSION = 'version_01';
- 
-// The files to make available for offline use. make sure to add 
-// others to this list
-var URLS = [
-  `${GHPATH}/`,
-  `${GHPATH}/index.html`,
-  `${GHPATH}/style.css`,
-  `${GHPATH}/script.js`,
-  `${GHPATH}/sw.js`,
-  `${GHPATH}/manifest.json`,
-  `${GHPATH}/file-upload.svg`,
-  `${GHPATH}/trash.svg`,
-  `${GHPATH}/icon-192x192.png`,
-  `${GHPATH}/icon-512x512.png`,
+const CACHE_NAME = 'spchspr_version_01';
+const FILES_TO_CACHE = [
+  '/Speechsprint/',
+  '/Speechsprint/index.html',
+  '/Speechsprint/style.css',
+  '/Speechsprint/script.js',
+  '/Speechsprint/sw.js',
+  '/Speechsprint/manifest.json',
+  '/Speechsprint/file-upload.svg',
+  '/Speechsprint/trash.svg',
+  '/Speechsprint/icon-192x192.png',
+  '/Speechsprint/icon-512x512.png',
 ];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(FILES_TO_CACHE);
+    })
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
