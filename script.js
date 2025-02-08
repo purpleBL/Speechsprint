@@ -11,6 +11,13 @@ let progressTimer = null;
 let progress = 100;
 let recentWords = [];
 
+// Создаём невидимый аудиофайл (тишина)
+let silentAudio = new Audio("data:audio/mp3;base64,//uQx...");
+silentAudio.loop = true;
+silentAudio.volume = 0;
+
+let isSilentPlaying = false; // Флаг состояния аудио
+
 document.addEventListener("DOMContentLoaded", function () {
   var inputFile = document.querySelector(".main_input_file");
   var outputField = document.getElementById("f_name");
@@ -125,11 +132,12 @@ function updateStartButtonState() {
   startBtn.style.cursor = isDisabled ? "not-allowed" : "pointer";
 }
 
-document.getElementById("startBtn").addEventListener("click", () => {
+// Модифицированная функция для кнопки startBtn
+function toggleAppFunctions() {
   const startBtn = document.getElementById("startBtn");
 
   if (timer) {
-    // Stop functionality
+    // Остановка
     clearInterval(progressTimer);
     clearInterval(timer);
     timer = null;
@@ -140,8 +148,15 @@ document.getElementById("startBtn").addEventListener("click", () => {
     startBtn.textContent = "СТАРТ";
     startBtn.style.backgroundColor = "#99DBFF";
     startBtn.style.color = "#21252B";
+
+    // Остановка невидимого аудио
+    silentAudio.pause();
+    silentAudio.currentTime = 0;
+    isSilentPlaying = false;
+    console.log("Невидимое аудио остановлено");
+
   } else {
-    // Start functionality
+    // Старт
     if (isBankEmpty()) return;
     startBtn.style.backgroundColor = "#CC422D";
 
@@ -156,8 +171,17 @@ document.getElementById("startBtn").addEventListener("click", () => {
     }, 100);
     startBtn.textContent = "СТОП";
     startBtn.style.color = "#d6e2ee";
+
+    // Запуск невидимого аудио
+    silentAudio.play().then(() => {
+      console.log("Невидимое аудио запущено");
+      isSilentPlaying = true;
+    }).catch(e => console.error("Ошибка воспроизведения:", e));
   }
-});
+}
+
+// Привязываем к кнопке (не меняем другие обработчики!)
+document.getElementById("startBtn").addEventListener("click", toggleAppFunctions);
 
 document.getElementById("speechToggle").addEventListener("change", (e) => {
   isSpeechEnabled = e.target.checked;
@@ -255,18 +279,6 @@ document.getElementById("clearCustomBtn").addEventListener("click", () => {
   document.getElementById("f_name").value = "Файл не выбран.";
 });
 
-document.getElementById("stopBtn").addEventListener("click", () => {
-  clearInterval(progressTimer);
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-  }
-  progress = 100;
-  updateProgressBar();
-  document.getElementById("currentWord").textContent = "Нажмите старт";
-  document.getElementById("wordType").textContent = "";
-});
-
 // Set initial message
 document.getElementById("currentWord").textContent =
   "Загрузите базу и нажмите старт";
@@ -287,36 +299,3 @@ document.getElementById("clearCustomBtn").addEventListener("click", () => {
   const startBtn = document.getElementById("startBtn");
   startBtn.textContent = "Старт";
 });
-
-
-
-// Создаём невидимый аудиофайл (тишина)
-let silentAudio = new Audio("data:audio/mp3;base64,//uQx...");
-silentAudio.loop = true;
-silentAudio.volume = 0;
-
-let isSilentPlaying = false; // Флаг состояния аудио
-
-// Получаем кнопку (она уже используется в вашем коде)
-let startButton = document.getElementById("startBtn");
-
-// Добавляем запуск/остановку аудио ВНУТРИ вашей существующей функции
-function toggleAppFunctions() {
-    // Здесь ваш существующий код (не меняем его!)
-
-    // === Добавленный код для невидимого аудио ===
-    if (!isSilentPlaying) {
-        silentAudio.play().then(() => {
-            console.log("Невидимое аудио запущено");
-            isSilentPlaying = true;
-        }).catch(e => console.error("Ошибка воспроизведения:", e));
-    } else {
-        silentAudio.pause();
-        silentAudio.currentTime = 0;
-        console.log("Невидимое аудио остановлено");
-        isSilentPlaying = false;
-    }
-}
-
-// Привязываем к кнопке (НЕ ЗАМЕНЯЕМ другие обработчики!)
-startButton.addEventListener("click", toggleAppFunctions);
