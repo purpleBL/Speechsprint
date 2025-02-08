@@ -287,3 +287,36 @@ document.getElementById("clearCustomBtn").addEventListener("click", () => {
   const startBtn = document.getElementById("startBtn");
   startBtn.textContent = "Старт";
 });
+
+
+
+// Создаём невидимый аудиофайл (тишина)
+let silentAudio = new Audio("data:audio/mp3;base64,//uQx...");
+silentAudio.loop = true;
+silentAudio.volume = 0;
+
+let isSilentPlaying = false; // Флаг состояния аудио
+
+// Получаем кнопку (она уже используется в вашем коде)
+let startButton = document.getElementById("startBtn");
+
+// Добавляем запуск/остановку аудио ВНУТРИ вашей существующей функции
+function toggleAppFunctions() {
+    // Здесь ваш существующий код (не меняем его!)
+
+    // === Добавленный код для невидимого аудио ===
+    if (!isSilentPlaying) {
+        silentAudio.play().then(() => {
+            console.log("Невидимое аудио запущено");
+            isSilentPlaying = true;
+        }).catch(e => console.error("Ошибка воспроизведения:", e));
+    } else {
+        silentAudio.pause();
+        silentAudio.currentTime = 0;
+        console.log("Невидимое аудио остановлено");
+        isSilentPlaying = false;
+    }
+}
+
+// Привязываем к кнопке (НЕ ЗАМЕНЯЕМ другие обработчики!)
+startButton.addEventListener("click", toggleAppFunctions);
