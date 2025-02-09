@@ -11,26 +11,42 @@ let progressTimer = null;
 let progress = 100;
 let recentWords = [];
 
-// Создаём корректный silent audio файл (1 секунда тишины)
-const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//sQxAADgnABGiAAQBCqgCRMAAgEAH///////////////7+n/9FTuQsQH//////2NG0jWUGlio5gLQTOtIxjkNnm+w3//NCTkOw2dZx/4d/2aj/5QFwbI0VHOCp2G9RxZICLQDQGXlhAZ//uSxBMAo8ZE/ACAUKAAAAp7wEAABYg/q/0T3rWqUPQxgANAMNXwH/JVdYCEsBiwLsPc+KDgLDuNmBRJ5HPCg8wV7OC9iGmf/c7cUGUABQNBRvgpxBAyINZ1j1+u6wE//bFBAZBSUCgAqChhPb8G3IzXw6QF1QO4AEEYIP4YGDwqVBEwIILr+gQSfB4XwMFf/4PBQqNuMOYKFR8wR+g+BgWCgr//j/gYTFaQwCMBFx/GCAIn/BQSOuCgYJ5g//pEkzLEEUvnxgkLWEwQSB0SzRozGSKjFBIGRb2dQMIOGDM+2f/+5LEFgB0AIl4AgF3gAAANIAAAASjVV/mYSGAVBgRMKJDCo9hnQTlGFiCVOpwKhwtRaQJrVcrIo0qgkRdX////6SYwc6lY8KCkQFAUBiohIoQnESpADjC5AIjRwuF0uKqCBEFqHAAAsA4Gf///4LDuVBQFhTArHBQVPuLAoCwqQwWh4akEFLoYKTE0FgBVRQoCwpioBgKCX/GDE3/5j3///+Y0QjgqKiwsP/Lwj4+sMioPjR//9ZaF4IZagTE2n1lBMQU1FMy45OS41qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/7ksQ4A8AAAaQAAAAgAAA0gAAABKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+// Создаем несколько копий аудио для чередования
+const silentAudios = [
+    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA")
+];
 
-silentAudio.loop = true;
-silentAudio.volume = 0.001; // Небольшая громкость вместо 0
+let currentAudioIndex = 0;
+let keepAudioAlive = false;
 
-let isSilentPlaying = false;
-let audioContext;
-
-function initAudioContext() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-    }
+// Функция для циклического воспроизведения тишины
+function playNextSilentAudio() {
+    if (!keepAudioAlive) return;
+    
+    const audio = silentAudios[currentAudioIndex];
+    audio.play()
+        .then(() => {
+            currentAudioIndex = (currentAudioIndex + 1) % silentAudios.length;
+            // Планируем следующее воспроизведение перед окончанием текущего
+            setTimeout(playNextSilentAudio, 100);
+        })
+        .catch(error => {
+            console.warn('Silent audio playback failed:', error);
+            // Пробуем снова через короткий промежуток
+            setTimeout(playNextSilentAudio, 1000);
+        });
 }
 
-document.addEventListener('touchstart', () => {
-    initAudioContext();
+document.addEventListener('touchstart', function initAudio() {
+    silentAudios.forEach(audio => {
+        audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }).catch(console.warn);
+    });
+    document.removeEventListener('touchstart', initAudio);
 }, { once: true });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -114,7 +130,6 @@ function getRandomWord() {
     verbs: "глагол",
   }[randomType];
 }
-
 function updateProgressBar() {
   const circle = document.querySelector(".progress-ring-circle");
   const radius = circle.r.baseVal.value;
@@ -145,54 +160,49 @@ function updateStartButtonState() {
 }
 
 function toggleAppFunctions() {
-  const startBtn = document.getElementById("startBtn");
+    const startBtn = document.getElementById("startBtn");
 
-  if (timer) {
-    clearInterval(progressTimer);
-    clearInterval(timer);
-    timer = null;
-    progress = 100;
-    updateProgressBar();
-    document.getElementById("currentWord").textContent = "Нажмите старт";
-    document.getElementById("wordType").textContent = "";
-    startBtn.textContent = "СТАРТ";
-    startBtn.style.backgroundColor = "#99DBFF";
-    startBtn.style.color = "#21252B";
+    if (timer) {
+        // Остановка
+        clearInterval(progressTimer);
+        clearInterval(timer);
+        timer = null;
+        progress = 100;
+        updateProgressBar();
+        document.getElementById("currentWord").textContent = "Нажмите старт";
+        document.getElementById("wordType").textContent = "";
+        startBtn.textContent = "СТАРТ";
+        startBtn.style.backgroundColor = "#99DBFF";
+        startBtn.style.color = "#21252B";
 
-    silentAudio.pause();
-    silentAudio.currentTime = 0;
-    isSilentPlaying = false;
-    if (audioContext) {
-        audioContext.suspend();
-    }
-
-  } else {
-    if (isBankEmpty()) return;
-    startBtn.style.backgroundColor = "#CC422D";
-
-    initAudioContext();
-    
-    setTimeout(() => {
-        silentAudio.play().catch(e => {
-            console.warn("Silent audio play failed:", e);
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+        // Останавливаем циклическое воспроизведение
+        keepAudioAlive = false;
+        silentAudios.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
         });
-    }, 100);
 
-    const interval = document.getElementById("interval").value;
-    getRandomWord();
-    timer = setInterval(getRandomWord, interval * 1000);
+    } else {
+        // Старт
+        if (isBankEmpty()) return;
+        startBtn.style.backgroundColor = "#CC422D";
 
-    const step = 100 / (interval * 10);
-    progressTimer = setInterval(() => {
-      progress = Math.max(0, progress - step);
-      updateProgressBar();
-    }, 100);
-    startBtn.textContent = "СТОП";
-    startBtn.style.color = "#d6e2ee";
-  }
+        // Запускаем циклическое воспроизведение
+        keepAudioAlive = true;
+        playNextSilentAudio();
+
+        const interval = document.getElementById("interval").value;
+        getRandomWord();
+        timer = setInterval(getRandomWord, interval * 1000);
+
+        const step = 100 / (interval * 10);
+        progressTimer = setInterval(() => {
+            progress = Math.max(0, progress - step);
+            updateProgressBar();
+        }, 100);
+        startBtn.textContent = "СТОП";
+        startBtn.style.color = "#d6e2ee";
+    }
 }
 
 document.getElementById("startBtn").addEventListener("click", toggleAppFunctions);
