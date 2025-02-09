@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spchspr_version_01';
+const CACHE_NAME = 'spchspr_version_02';
 const FILES_TO_CACHE = [
   '/Speechsprint/',
   '/Speechsprint/index.html',
@@ -10,6 +10,9 @@ const FILES_TO_CACHE = [
   '/Speechsprint/trash.svg',
   '/Speechsprint/icon-192x192.png',
   '/Speechsprint/icon-512x512.png',
+  'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA', // Кэшируем тишину
+  'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
+  'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
 ];
 
 self.addEventListener('install', (event) => {
