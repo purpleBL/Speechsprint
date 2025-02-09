@@ -13,9 +13,9 @@ let recentWords = [];
 
 // Создаем несколько копий аудио для чередования
 const silentAudios = [
-    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
-    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
-    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA")
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA")
 ];
 
 let currentAudioIndex = 0;
@@ -23,31 +23,46 @@ let keepAudioAlive = false;
 
 // Функция для циклического воспроизведения тишины
 function playNextSilentAudio() {
-    if (!keepAudioAlive) return;
-    
-    const audio = silentAudios[currentAudioIndex];
-    audio.play()
-        .then(() => {
-            currentAudioIndex = (currentAudioIndex + 1) % silentAudios.length;
-            // Планируем следующее воспроизведение перед окончанием текущего
-            setTimeout(playNextSilentAudio, 100);
-        })
-        .catch(error => {
-            console.warn('Silent audio playback failed:', error);
-            // Пробуем снова через короткий промежуток
-            setTimeout(playNextSilentAudio, 1000);
-        });
+  if (!keepAudioAlive) return;
+
+  const audio = silentAudios[currentAudioIndex];
+  audio.play()
+    .then(() => {
+      currentAudioIndex = (currentAudioIndex + 1) % silentAudios.length;
+      // Планируем следующее воспроизведение перед окончанием текущего
+      setTimeout(playNextSilentAudio, 100);
+    })
+    .catch(error => {
+      console.warn('Silent audio playback failed:', error);
+      // Пробуем снова через короткий промежуток
+      setTimeout(playNextSilentAudio, 1000);
+    });
 }
 
+// Обработчик события touchstart для инициализации аудио
 document.addEventListener('touchstart', function initAudio() {
-    silentAudios.forEach(audio => {
-        audio.play().then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }).catch(console.warn);
-    });
-    document.removeEventListener('touchstart', initAudio);
+  silentAudios.forEach(audio => {
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(console.warn);
+  });
+  document.removeEventListener('touchstart', initAudio);
 }, { once: true });
+
+// Обработчик события visibilitychange для управления аудио
+document.addEventListener('visibilitychange', function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    keepAudioAlive = true;
+    playNextSilentAudio();
+  } else {
+    keepAudioAlive = false;
+    silentAudios.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+  }
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   var inputFile = document.querySelector(".main_input_file");
@@ -130,6 +145,7 @@ function getRandomWord() {
     verbs: "глагол",
   }[randomType];
 }
+
 function updateProgressBar() {
   const circle = document.querySelector(".progress-ring-circle");
   const radius = circle.r.baseVal.value;
@@ -160,49 +176,49 @@ function updateStartButtonState() {
 }
 
 function toggleAppFunctions() {
-    const startBtn = document.getElementById("startBtn");
+  const startBtn = document.getElementById("startBtn");
 
-    if (timer) {
-        // Остановка
-        clearInterval(progressTimer);
-        clearInterval(timer);
-        timer = null;
-        progress = 100;
-        updateProgressBar();
-        document.getElementById("currentWord").textContent = "Нажмите старт";
-        document.getElementById("wordType").textContent = "";
-        startBtn.textContent = "СТАРТ";
-        startBtn.style.backgroundColor = "#99DBFF";
-        startBtn.style.color = "#21252B";
+  if (timer) {
+    // Остановка
+    clearInterval(progressTimer);
+    clearInterval(timer);
+    timer = null;
+    progress = 100;
+    updateProgressBar();
+    document.getElementById("currentWord").textContent = "Нажмите старт";
+    document.getElementById("wordType").textContent = "";
+    startBtn.textContent = "СТАРТ";
+    startBtn.style.backgroundColor = "#99DBFF";
+    startBtn.style.color = "#21252B";
 
-        // Останавливаем циклическое воспроизведение
-        keepAudioAlive = false;
-        silentAudios.forEach(audio => {
-            audio.pause();
-            audio.currentTime = 0;
-        });
+    // Останавливаем циклическое воспроизведение
+    keepAudioAlive = false;
+    silentAudios.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
 
-    } else {
-        // Старт
-        if (isBankEmpty()) return;
-        startBtn.style.backgroundColor = "#CC422D";
+  } else {
+    // Старт
+    if (isBankEmpty()) return;
+    startBtn.style.backgroundColor = "#CC422D";
 
-        // Запускаем циклическое воспроизведение
-        keepAudioAlive = true;
-        playNextSilentAudio();
+    // Запускаем циклическое воспроизведение
+    keepAudioAlive = true;
+    playNextSilentAudio();
 
-        const interval = document.getElementById("interval").value;
-        getRandomWord();
-        timer = setInterval(getRandomWord, interval * 1000);
+    const interval = document.getElementById("interval").value;
+    getRandomWord();
+    timer = setInterval(getRandomWord, interval * 1000);
 
-        const step = 100 / (interval * 10);
-        progressTimer = setInterval(() => {
-            progress = Math.max(0, progress - step);
-            updateProgressBar();
-        }, 100);
-        startBtn.textContent = "СТОП";
-        startBtn.style.color = "#d6e2ee";
-    }
+    const step = 100 / (interval * 10);
+    progressTimer = setInterval(() => {
+      progress = Math.max(0, progress - step);
+      updateProgressBar();
+    }, 100);
+    startBtn.textContent = "СТОП";
+    startBtn.style.color = "#d6e2ee";
+  }
 }
 
 document.getElementById("startBtn").addEventListener("click", toggleAppFunctions);
