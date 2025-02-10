@@ -6,7 +6,6 @@ let words = {
   verbs: []
 };
 
-// Кэш для хранения данных
 let wordsCache = {
   nouns: [],
   adjectives: [],
@@ -18,7 +17,6 @@ let progressTimer = null;
 let progress = 100;
 let recentWords = [];
 
-// Создаем несколько копий аудио для чередования
 const silentAudios = [
   new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
   new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
@@ -28,7 +26,6 @@ const silentAudios = [
 let currentAudioIndex = 0;
 let keepAudioAlive = false;
 
-// Функция для циклического воспроизведения тишины
 function playNextSilentAudio() {
   if (!keepAudioAlive) return;
 
@@ -36,17 +33,14 @@ function playNextSilentAudio() {
   audio.play()
     .then(() => {
       currentAudioIndex = (currentAudioIndex + 1) % silentAudios.length;
-      // Планируем следующее воспроизведение перед окончанием текущего
       setTimeout(playNextSilentAudio, 100);
     })
     .catch(error => {
       console.warn('Silent audio playback failed:', error);
-      // Пробуем снова через короткий промежуток
       setTimeout(playNextSilentAudio, 1000);
     });
 }
 
-// Обработчик события touchstart для инициализации аудио
 document.addEventListener('touchstart', function initAudio() {
   silentAudios.forEach(audio => {
     audio.play().then(() => {
@@ -57,7 +51,6 @@ document.addEventListener('touchstart', function initAudio() {
   document.removeEventListener('touchstart', initAudio);
 }, { once: true });
 
-// Обработчик события visibilitychange для управления аудио
 document.addEventListener('visibilitychange', function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
     keepAudioAlive = true;
@@ -86,13 +79,15 @@ document.addEventListener("DOMContentLoaded", function () {
     outputField.value = f_name.join(", ");
   });
 
-  // Делаем кнопку "Старт" неактивной до загрузки файла с данными
   const startBtn = document.getElementById("startBtn");
   startBtn.disabled = true;
   startBtn.style.opacity = "0.5";
   startBtn.style.cursor = "not-allowed";
-  startBtn.style.backgroundColor = "#99DBFF"; // Устанавливаем начальный цвет кнопки
-  startBtn.style.color = "#21252B"; // Устанавливаем начальный цвет текста кнопки
+  startBtn.style.backgroundColor = "#99DBFF";
+  startBtn.style.color = "#21252B";
+
+  // Загружаем данные из localStorage при загрузке страницы
+  loadWordsFromStorage();
 });
 
 function getRandomWord() {
@@ -199,8 +194,8 @@ function updateStartButtonState() {
   startBtn.style.cursor = isDisabled ? "not-allowed" : "pointer";
 
   if (isDisabled) {
-    startBtn.style.backgroundColor = "#99DBFF"; // Возвращаем начальный цвет кнопки
-    startBtn.style.color = "#21252B"; // Возвращаем начальный цвет текста кнопки
+    startBtn.style.backgroundColor = "#99DBFF";
+    startBtn.style.color = "#21252B";
   }
 }
 
@@ -208,7 +203,6 @@ function toggleAppFunctions() {
   const startBtn = document.getElementById("startBtn");
 
   if (timer) {
-    // Остановка
     clearInterval(progressTimer);
     clearInterval(timer);
     timer = null;
@@ -220,19 +214,16 @@ function toggleAppFunctions() {
     startBtn.style.backgroundColor = "#99DBFF";
     startBtn.style.color = "#21252B";
 
-    // Останавливаем циклическое воспроизведение
     keepAudioAlive = false;
     silentAudios.forEach(audio => {
       audio.pause();
       audio.currentTime = 0;
     });
   } else {
-    // Старт
     if (isBankEmpty()) return;
     startBtn.style.backgroundColor = "#CC422D";
     startBtn.style.color = "#d6e2ee";
 
-    // Запускаем циклическое воспроизведение
     keepAudioAlive = true;
     playNextSilentAudio();
 
@@ -288,16 +279,9 @@ function updateWordCounts() {
   }
 }
 
-// Функция для загрузки данных из файла и заполнения кэша
 function loadWordsFromFile(file) {
-  words.nouns = [];
-  words.adjectives = [];
-  words.verbs = [];
-  wordsCache = {
-    nouns: [],
-    adjectives: [],
-    verbs: []
-  };
+  // Сначала пытаемся загрузить данные из localStorage
+  loadWordsFromStorage();
 
   if (file) {
     const reader = new FileReader();
@@ -321,28 +305,40 @@ function loadWordsFromFile(file) {
         }
       });
 
+      // Сохраняем данные в localStorage
+      saveWordsToStorage();
+
       updateWordCounts();
       updateStartButtonState();
 
-      // Активируем кнопку "Старт" только если были загружены валидные данные
       const startBtn = document.getElementById("startBtn");
       startBtn.disabled = !hasValidData;
       startBtn.style.opacity = hasValidData ? "1" : "0.5";
       startBtn.style.cursor = hasValidData ? "pointer" : "not-allowed";
-      startBtn.style.backgroundColor = hasValidData ? "#99DBFF" : "#99DBFF"; // Устанавливаем начальный цвет кнопки
-      startBtn.style.color = hasValidData ? "#21252B" : "#21252B"; // Устанавливаем начальный цвет текста кнопки
+      startBtn.style.backgroundColor = hasValidData ? "#99DBFF" : "#99DBFF";
+      startBtn.style.color = hasValidData ? "#21252B" : "#21252B";
     };
     reader.readAsText(file);
   }
 }
 
-document.getElementById("wordFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  loadWordsFromFile(file);
-  document.getElementById("currentWord").textContent = "Нажмите старт";
-});
+function saveWordsToStorage() {
+  localStorage.setItem('words', JSON.stringify(words));
+  localStorage.setItem('wordsCache', JSON.stringify(wordsCache));
+}
 
-// Функция для очистки данных
+function loadWordsFromStorage() {
+  const storedWords = localStorage.getItem('words');
+  const storedWordsCache = localStorage.getItem('wordsCache');
+
+  if (storedWords && storedWordsCache) {
+    words = JSON.parse(storedWords);
+    wordsCache = JSON.parse(storedWordsCache);
+    updateWordCounts();
+    updateStartButtonState();
+  }
+}
+
 function clearCustomData() {
   words.nouns = [];
   words.adjectives = [];
@@ -352,6 +348,9 @@ function clearCustomData() {
     adjectives: [],
     verbs: []
   };
+
+  saveWordsToStorage(); // Сохраняем изменения в localStorage
+
   updateWordCounts();
   const fileInput = document.getElementById("wordFile");
   fileInput.value = "";
@@ -368,12 +367,17 @@ function clearCustomData() {
   }
   document.getElementById("f_name").value = "Файл не выбран.";
 
-  // Сбрасываем стиль кнопки "Старт"
   const startBtn = document.getElementById("startBtn");
   startBtn.textContent = "Старт";
-  startBtn.style.backgroundColor = "#99DBFF"; // Возвращаем начальный цвет кнопки
-  startBtn.style.color = "#21252B"; // Возвращаем начальный цвет текста кнопки
+  startBtn.style.backgroundColor = "#99DBFF";
+  startBtn.style.color = "#21252B";
 }
+
+document.getElementById("wordFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  loadWordsFromFile(file);
+  document.getElementById("currentWord").textContent = "Нажмите старт";
+});
 
 document.getElementById("clearCustomBtn").addEventListener("click", clearCustomData);
 
@@ -381,3 +385,6 @@ document.getElementById("currentWord").textContent =
   "Загрузите базу и нажмите старт";
 
 updateWordCounts();
+
+// Загружаем данные из localStorage при загрузке страницы
+document.addEventListener("DOMContentLoaded", loadWordsFromStorage);
