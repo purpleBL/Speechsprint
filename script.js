@@ -72,12 +72,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var f_name = [];
     var files = inputFile.files;
 
-    for (var i = 0; i < files.length; i++) {
-      f_name.push(files[i].name);
+    if (files.length === 0) {
+      outputField.value = "Файл не выбран.";
+      saveFileName("Файл не выбран.");
+    } else {
+      for (var i = 0; i < files.length; i++) {
+        f_name.push(files[i].name);
+      }
+      outputField.value = f_name.join(", ");
+      saveFileName(f_name.join(", "));
     }
-
-    outputField.value = f_name.join(", ");
-    saveFileName(f_name.join(", "));
   });
 
   const startBtn = document.getElementById("startBtn");
