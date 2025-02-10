@@ -91,6 +91,8 @@ document.addEventListener("DOMContentLoaded", function () {
   startBtn.disabled = true;
   startBtn.style.opacity = "0.5";
   startBtn.style.cursor = "not-allowed";
+  startBtn.style.backgroundColor = "#99DBFF"; // Устанавливаем начальный цвет кнопки
+  startBtn.style.color = "#21252B"; // Устанавливаем начальный цвет текста кнопки
 });
 
 function getRandomWord() {
@@ -217,6 +219,7 @@ function toggleAppFunctions() {
     // Старт
     if (isBankEmpty()) return;
     startBtn.style.backgroundColor = "#CC422D";
+    startBtn.style.color = "#d6e2ee";
 
     // Запускаем циклическое воспроизведение
     keepAudioAlive = true;
@@ -232,7 +235,6 @@ function toggleAppFunctions() {
       updateProgressBar();
     }, 100);
     startBtn.textContent = "СТОП";
-    startBtn.style.color = "#d6e2ee";
   }
 }
 
@@ -314,6 +316,8 @@ function loadWordsFromFile(file) {
       startBtn.disabled = false;
       startBtn.style.opacity = "1";
       startBtn.style.cursor = "pointer";
+      startBtn.style.backgroundColor = "#99DBFF"; // Устанавливаем начальный цвет кнопки
+      startBtn.style.color = "#21252B"; // Устанавливаем начальный цвет текста кнопки
     };
     reader.readAsText(file);
   }
@@ -354,8 +358,8 @@ function clearCustomData() {
   // Сбрасываем стиль кнопки "Старт"
   const startBtn = document.getElementById("startBtn");
   startBtn.textContent = "Старт";
-  startBtn.style.backgroundColor = "#99DBFF";
-  startBtn.style.color = "#21252B";
+  startBtn.style.backgroundColor = "#99DBFF"; // Возвращаем начальный цвет кнопки
+  startBtn.style.color = "#21252B"; // Возвращаем начальный цвет текста кнопки
 }
 
 document.getElementById("clearCustomBtn").addEventListener("click", clearCustomData);
