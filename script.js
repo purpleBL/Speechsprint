@@ -331,6 +331,14 @@ function loadWordsFromFile(file) {
       startBtn.style.cursor = hasValidData ? "pointer" : "not-allowed";
       startBtn.style.backgroundColor = hasValidData ? "#99DBFF" : "#99DBFF";
       startBtn.style.color = hasValidData ? "#21252B" : "#21252B";
+
+      if (!hasValidData) {
+        document.getElementById("f_name").value = "Файл не выбран.";
+        saveFileName("Файл не выбран.");
+        document.getElementById("currentWord").textContent = "Загрузите базу и нажмите старт";
+      } else {
+        document.getElementById("currentWord").textContent = "Нажмите старт";
+      }
     };
     reader.readAsText(file);
   }
@@ -402,7 +410,11 @@ function clearCustomData() {
 document.getElementById("wordFile").addEventListener("change", (e) => {
   const file = e.target.files[0];
   loadWordsFromFile(file);
-  document.getElementById("currentWord").textContent = "Нажмите старт";
+  if (Object.values(wordsCache).some(arr => arr.length > 0)) {
+    document.getElementById("currentWord").textContent = "Нажмите старт";
+  } else {
+    document.getElementById("currentWord").textContent = "Загрузите базу и нажмите старт";
+  }
 });
 
 document.getElementById("clearCustomBtn").addEventListener("click", clearCustomData);
