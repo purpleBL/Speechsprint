@@ -197,6 +197,11 @@ function updateStartButtonState() {
   startBtn.disabled = isDisabled;
   startBtn.style.opacity = isDisabled ? "0.5" : "1";
   startBtn.style.cursor = isDisabled ? "not-allowed" : "pointer";
+
+  if (isDisabled) {
+    startBtn.style.backgroundColor = "#99DBFF"; // Возвращаем начальный цвет кнопки
+    startBtn.style.color = "#21252B"; // Возвращаем начальный цвет текста кнопки
+  }
 }
 
 function toggleAppFunctions() {
@@ -301,6 +306,7 @@ function loadWordsFromFile(file) {
       const lines = content.split("\n").map((line) => line.trim());
 
       let currentCategory = "";
+      let hasValidData = false;
       lines.forEach((line) => {
         if (line === "nouns-data") {
           currentCategory = "nouns";
@@ -311,19 +317,20 @@ function loadWordsFromFile(file) {
         } else if (line && currentCategory) {
           words[currentCategory].push(line);
           wordsCache[currentCategory].push(line);
+          hasValidData = true;
         }
       });
 
       updateWordCounts();
       updateStartButtonState();
 
-      // Активируем кнопку "Старт" после загрузки данных
+      // Активируем кнопку "Старт" только если были загружены валидные данные
       const startBtn = document.getElementById("startBtn");
-      startBtn.disabled = false;
-      startBtn.style.opacity = "1";
-      startBtn.style.cursor = "pointer";
-      startBtn.style.backgroundColor = "#99DBFF"; // Устанавливаем начальный цвет кнопки
-      startBtn.style.color = "#21252B"; // Устанавливаем начальный цвет текста кнопки
+      startBtn.disabled = !hasValidData;
+      startBtn.style.opacity = hasValidData ? "1" : "0.5";
+      startBtn.style.cursor = hasValidData ? "pointer" : "not-allowed";
+      startBtn.style.backgroundColor = hasValidData ? "#99DBFF" : "#99DBFF"; // Устанавливаем начальный цвет кнопки
+      startBtn.style.color = hasValidData ? "#21252B" : "#21252B"; // Устанавливаем начальный цвет текста кнопки
     };
     reader.readAsText(file);
   }
