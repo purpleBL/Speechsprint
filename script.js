@@ -1,9 +1,16 @@
 let isSpeechEnabled = true;
 
-const words = {
+let words = {
   nouns: [],
   adjectives: [],
   verbs: [],
+};
+
+// Кэш для хранения данных
+let wordsCache = {
+  nouns: [],
+  adjectives: [],
+  verbs: []
 };
 
 let timer = null;
@@ -87,17 +94,17 @@ function getRandomWord() {
   let randomType, randomWord, availableWords;
 
   if (selectedCategory === "all") {
-    const nonEmptyTypes = Object.keys(words).filter(
-      (type) => words[type].length > 0
+    const nonEmptyTypes = Object.keys(wordsCache).filter(
+      (type) => wordsCache[type].length > 0
     );
     if (nonEmptyTypes.length === 0) return;
     randomType =
       nonEmptyTypes[Math.floor(Math.random() * nonEmptyTypes.length)];
-    availableWords = Object.values(words).flat();
+    availableWords = Object.values(wordsCache).flat();
   } else {
-    if (words[selectedCategory].length === 0) return;
+    if (wordsCache[selectedCategory].length === 0) return;
     randomType = selectedCategory;
-    availableWords = words[selectedCategory];
+    availableWords = wordsCache[selectedCategory];
   }
 
   const totalWords = availableWords.length;
@@ -131,19 +138,24 @@ function getRandomWord() {
     recentWords.shift();
   }
 
-  document.getElementById("currentWord").textContent = randomWord;
+  try {
+    document.getElementById("currentWord").textContent = randomWord;
+    document.getElementById("wordType").textContent = {
+      nouns: "существительное",
+      adjectives: "прилагательное",
+      verbs: "глагол",
+    }[randomType] || "неизвестно";
+  } catch (error) {
+    console.error("Ошибка при выводе слова и категории:", error);
+    console.error("randomWord:", randomWord);
+    console.error("randomType:", randomType);
+  }
 
   if (isSpeechEnabled) {
     const utterance = new SpeechSynthesisUtterance(randomWord);
     utterance.lang = "ru-RU";
     speechSynthesis.speak(utterance);
   }
-
-  document.getElementById("wordType").textContent = {
-    nouns: "существительное",
-    adjectives: "прилагательное",
-    verbs: "глагол",
-  }[randomType];
 }
 
 function updateProgressBar() {
@@ -160,7 +172,7 @@ function updateProgressBar() {
 }
 
 function isBankEmpty() {
-  const totalWords = Object.values(words).reduce(
+  const totalWords = Object.values(wordsCache).reduce(
     (sum, arr) => sum + arr.length,
     0
   );
@@ -229,12 +241,12 @@ document.getElementById("speechToggle").addEventListener("change", (e) => {
 
 function updateWordCounts() {
   document.getElementById("totalWords").textContent = Object.values(
-    words
+    wordsCache
   ).reduce((sum, arr) => sum + arr.length, 0);
-  document.getElementById("nounsCount").textContent = words.nouns.length;
+  document.getElementById("nounsCount").textContent = wordsCache.nouns.length;
   document.getElementById("adjectivesCount").textContent =
-    words.adjectives.length;
-  document.getElementById("verbsCount").textContent = words.verbs.length;
+    wordsCache.adjectives.length;
+  document.getElementById("verbsCount").textContent = wordsCache.verbs.length;
 
   const select = document.getElementById("wordCategory");
   const options = select.options;
@@ -242,11 +254,11 @@ function updateWordCounts() {
   for (let i = 0; i < options.length; i++) {
     const value = options[i].value;
     if (value === "all") {
-      options[i].disabled = Object.values(words).every(
+      options[i].disabled = Object.values(wordsCache).every(
         (arr) => arr.length === 0
       );
     } else {
-      options[i].disabled = words[value].length === 0;
+      options[i].disabled = wordsCache[value].length === 0;
     }
   }
 
@@ -260,11 +272,16 @@ function updateWordCounts() {
   }
 }
 
-document.getElementById("wordFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
+// Функция для загрузки данных из файла и заполнения кэша
+function loadWordsFromFile(file) {
   words.nouns = [];
   words.adjectives = [];
   words.verbs = [];
+  wordsCache = {
+    nouns: [],
+    adjectives: [],
+    verbs: []
+  };
 
   if (file) {
     const reader = new FileReader();
@@ -282,6 +299,7 @@ document.getElementById("wordFile").addEventListener("change", (e) => {
           currentCategory = "adjectives";
         } else if (line && currentCategory) {
           words[currentCategory].push(line);
+          wordsCache[currentCategory].push(line);
         }
       });
 
@@ -290,14 +308,24 @@ document.getElementById("wordFile").addEventListener("change", (e) => {
     };
     reader.readAsText(file);
   }
+}
+
+document.getElementById("wordFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  loadWordsFromFile(file);
+  document.getElementById("currentWord").textContent = "Нажмите старт";
 });
 
-updateStartButtonState();
-
-document.getElementById("clearCustomBtn").addEventListener("click", () => {
+// Функция для очистки данных
+function clearCustomData() {
   words.nouns = [];
   words.adjectives = [];
   words.verbs = [];
+  wordsCache = {
+    nouns: [],
+    adjectives: [],
+    verbs: []
+  };
   updateWordCounts();
   const fileInput = document.getElementById("wordFile");
   fileInput.value = "";
@@ -313,17 +341,12 @@ document.getElementById("clearCustomBtn").addEventListener("click", () => {
     updateProgressBar();
   }
   document.getElementById("f_name").value = "Файл не выбран.";
-});
+}
+
+document.getElementById("clearCustomBtn").addEventListener("click", clearCustomData);
 
 document.getElementById("currentWord").textContent =
   "Загрузите базу и нажмите старт";
-
-document.getElementById("wordFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    document.getElementById("currentWord").textContent = "Нажмите старт";
-  }
-});
 
 updateWordCounts();
 
