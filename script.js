@@ -116,10 +116,16 @@ function getRandomWord() {
   const totalWords = availableWords.length;
   let minDistance;
 
-  if (totalWords >= 50) {
-    minDistance = 25;
+  if (totalWords >= 100) {
+    minDistance = 50;
+  } else if (totalWords >= 50) {
+    minDistance = 30;
+  } else if (totalWords >= 30) {
+    minDistance = 15;
   } else if (totalWords >= 10) {
-    minDistance = 10;
+    minDistance = 5;
+  } else if (totalWords >= 5) {
+    minDistance = 3;
   } else if (totalWords >= 2) {
     minDistance = 1;
   } else {
