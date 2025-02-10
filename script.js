@@ -13,9 +13,18 @@ let recentWords = [];
 
 // Создаем несколько копий аудио для чередования
 const silentAudios = [
-  new Audio("/Speechsprint/silent_audio.wav"), // Путь к реальному аудиофайлу
-  new Audio("/Speechsprint/silent_audio.wav"),
-  new Audio("/Speechsprint/silent_audio.wav")
+  new Audio("data: audio/
+      wav; base64, Uk1GRig-
+      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
+      YAQACABAAAABKYXRhAgAAAAEA"), 
+  new Audio("data:audio/
+      wav; base64, Uk1GRig-
+      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
+      YAQACABAAAABKYXRhAgAAAAEA"),
+  new Audio("data:audio/
+      wav; base64, UklGRig-
+      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
+      YAQACABAAAABkYXRhAgAAAAEA" )
 ];
 
 let currentAudioIndex = 0;
