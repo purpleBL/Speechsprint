@@ -77,6 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     outputField.value = f_name.join(", ");
+    saveFileName(f_name.join(", "));
   });
 
   const startBtn = document.getElementById("startBtn");
@@ -88,6 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Загружаем данные из localStorage при загрузке страницы
   loadWordsFromStorage();
+  loadFileNameFromStorage();
 });
 
 function getRandomWord() {
@@ -307,6 +309,7 @@ function loadWordsFromFile(file) {
 
       // Сохраняем данные в localStorage
       saveWordsToStorage();
+      saveFileName(file.name);
 
       updateWordCounts();
       updateStartButtonState();
@@ -339,6 +342,17 @@ function loadWordsFromStorage() {
   }
 }
 
+function saveFileName(fileName) {
+  localStorage.setItem('fileName', fileName);
+}
+
+function loadFileNameFromStorage() {
+  const storedFileName = localStorage.getItem('fileName');
+  if (storedFileName) {
+    document.getElementById("f_name").value = storedFileName;
+  }
+}
+
 function clearCustomData() {
   words.nouns = [];
   words.adjectives = [];
@@ -350,6 +364,7 @@ function clearCustomData() {
   };
 
   saveWordsToStorage(); // Сохраняем изменения в localStorage
+  saveFileName("Файл не выбран."); // Сохраняем пустое имя файла
 
   updateWordCounts();
   const fileInput = document.getElementById("wordFile");
@@ -387,4 +402,7 @@ document.getElementById("currentWord").textContent =
 updateWordCounts();
 
 // Загружаем данные из localStorage при загрузке страницы
-document.addEventListener("DOMContentLoaded", loadWordsFromStorage);
+document.addEventListener("DOMContentLoaded", () => {
+  loadWordsFromStorage();
+  loadFileNameFromStorage();
+});
