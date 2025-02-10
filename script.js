@@ -90,6 +90,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Загружаем данные из localStorage при загрузке страницы
   loadWordsFromStorage();
   loadFileNameFromStorage();
+
+  // Проверяем, есть ли данные в localStorage
+  if (Object.values(wordsCache).some(arr => arr.length > 0)) {
+    document.getElementById("currentWord").textContent = "Нажмите старт";
+  } else {
+    document.getElementById("currentWord").textContent = "Загрузите базу и нажмите старт";
+  }
 });
 
 function getRandomWord() {
@@ -401,8 +408,14 @@ document.getElementById("currentWord").textContent =
 
 updateWordCounts();
 
-// Загружаем данные из localStorage при загрузке страницы
+// Проверяем, есть ли данные в localStorage при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
   loadWordsFromStorage();
   loadFileNameFromStorage();
+
+  if (Object.values(wordsCache).some(arr => arr.length > 0)) {
+    document.getElementById("currentWord").textContent = "Нажмите старт";
+  } else {
+    document.getElementById("currentWord").textContent = "Загрузите базу и нажмите старт";
+  }
 });
