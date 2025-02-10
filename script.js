@@ -13,18 +13,9 @@ let recentWords = [];
 
 // Создаем несколько копий аудио для чередования
 const silentAudios = [
-  new Audio("data: audio/
-      wav; base64, Uk1GRig-
-      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
-      YAQACABAAAABKYXRhAgAAAAEA"), 
-  new Audio("data:audio/
-      wav; base64, Uk1GRig-
-      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
-      YAQACABAAAABKYXRhAgAAAAEA"),
-  new Audio("data:audio/
-      wav; base64, UklGRig-
-      AAABXQVZFZm10IBIAAAABAAEARKwAAIh-
-      YAQACABAAAABkYXRhAgAAAAEA" )
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"),
+  new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA")
 ];
 
 let currentAudioIndex = 0;
