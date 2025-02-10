@@ -91,7 +91,7 @@
     ];
   
     if (navigator.serviceWorker) {
-      navigator.serviceWorker.register(`${GHPATH}/sw.js`, { scope: GHPATH })
+      navigator.serviceWorker.register(`${GHPATH}/sw.js`, { scope: GHPATH + '/' })
         .then((registration) => {
           console.log('Service Worker registered with scope:', registration.scope);
         }).catch((error) => {
