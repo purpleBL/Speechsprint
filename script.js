@@ -3,7 +3,7 @@ let isSpeechEnabled = true;
 let words = {
   nouns: [],
   adjectives: [],
-  verbs: [],
+  verbs: []
 };
 
 // Кэш для хранения данных
@@ -98,11 +98,9 @@ function getRandomWord() {
       (type) => wordsCache[type].length > 0
     );
     if (nonEmptyTypes.length === 0) return;
-    randomType =
-      nonEmptyTypes[Math.floor(Math.random() * nonEmptyTypes.length)];
-    availableWords = Object.values(wordsCache).flat();
+    randomType = nonEmptyTypes[Math.floor(Math.random() * nonEmptyTypes.length)];
+    availableWords = wordsCache[randomType];
   } else {
-    if (wordsCache[selectedCategory].length === 0) return;
     randomType = selectedCategory;
     availableWords = wordsCache[selectedCategory];
   }
@@ -142,8 +140,8 @@ function getRandomWord() {
     document.getElementById("currentWord").textContent = randomWord;
     document.getElementById("wordType").textContent = {
       nouns: "существительное",
-      adjectives: "прилагательное",
       verbs: "глагол",
+      adjectives: "прилагательное"
     }[randomType] || "неизвестно";
   } catch (error) {
     console.error("Ошибка при выводе слова и категории:", error);
