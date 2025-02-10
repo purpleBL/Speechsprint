@@ -85,6 +85,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     outputField.value = f_name.join(", ");
   });
+
+  // Делаем кнопку "Старт" неактивной до загрузки файла с данными
+  const startBtn = document.getElementById("startBtn");
+  startBtn.disabled = true;
+  startBtn.style.opacity = "0.5";
+  startBtn.style.cursor = "not-allowed";
 });
 
 function getRandomWord() {
@@ -207,7 +213,6 @@ function toggleAppFunctions() {
       audio.pause();
       audio.currentTime = 0;
     });
-
   } else {
     // Старт
     if (isBankEmpty()) return;
@@ -303,6 +308,12 @@ function loadWordsFromFile(file) {
 
       updateWordCounts();
       updateStartButtonState();
+
+      // Активируем кнопку "Старт" после загрузки данных
+      const startBtn = document.getElementById("startBtn");
+      startBtn.disabled = false;
+      startBtn.style.opacity = "1";
+      startBtn.style.cursor = "pointer";
     };
     reader.readAsText(file);
   }
@@ -339,6 +350,12 @@ function clearCustomData() {
     updateProgressBar();
   }
   document.getElementById("f_name").value = "Файл не выбран.";
+
+  // Сбрасываем стиль кнопки "Старт"
+  const startBtn = document.getElementById("startBtn");
+  startBtn.textContent = "Старт";
+  startBtn.style.backgroundColor = "#99DBFF";
+  startBtn.style.color = "#21252B";
 }
 
 document.getElementById("clearCustomBtn").addEventListener("click", clearCustomData);
@@ -347,8 +364,3 @@ document.getElementById("currentWord").textContent =
   "Загрузите базу и нажмите старт";
 
 updateWordCounts();
-
-document.getElementById("clearCustomBtn").addEventListener("click", () => {
-  const startBtn = document.getElementById("startBtn");
-  startBtn.textContent = "Старт";
-});
